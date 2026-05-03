@@ -1,3 +1,4 @@
+from logging import critical
 from curl_cffi import requests
 from colorama import Fore, Style
 import sys
@@ -6,6 +7,15 @@ from pathlib import Path
 # Pull security headers from OWASP
 OWASP_SECURITY_HEADERS_ADD = "https://raw.githubusercontent.com/OWASP/www-project-secure-headers/refs/heads/master/ci/headers_add.json"
 OWASP_SECURITY_HEADERS_REMOVE = "https://raw.githubusercontent.com/OWASP/www-project-secure-headers/refs/heads/master/ci/headers_remove.json"
+CRITICAL_HEADERS = [
+    "strict-transport-security",
+    "content-security-policy",
+    "x-content-type-options",
+    "x-frame-options",
+    "referrer-policy",
+    "permissions-policy",
+    "cross-origin-opener-policy",
+]
 def get_owasp_security_headers(owasp_url):
     try:    
         response = requests.get(owasp_url)
@@ -69,12 +79,39 @@ if __name__ == "__main__":
         if name in remove_headers:
             unrecommended_headers.append(name)
 
+    # Format CRITICAL_HEADERS correctly
+    critical_lower = {h.lower() for h in CRITICAL_HEADERS}
+
+    dangerous_headers = []
+    dangerous_misconfig_headers = []
+    # Check if any critically missing headers
+    if missing_headers:
+        for i in range(len(missing_headers) - 1, -1, -1):
+            if missing_headers[i].lower() in critical_lower:
+                dangerous_headers.append(missing_headers[i])
+                missing_headers.pop(i)
+    # Check if any critically modified headers
+    if misconfigured_headers:
+        for i in range(len(misconfigured_headers) - 1, -1, -1):
+            if misconfigured_headers[i][0].lower() in critical_lower:
+                dangerous_misconfig_headers.append(misconfigured_headers[i])
+                misconfigured_headers.pop(i)
+
+
     # Print results
     print(f"{Fore.GREEN}{10 * '='} Results {10 * '='}{Style.RESET_ALL}")
+    if dangerous_headers:
+        print(f"{Fore.BLACK} [ !! ] CRITICAL HEADERS MISSING: {Style.RESET_ALL}")
+        for header in dangerous_headers:
+            print(f"{Fore.BLACK}\t - {header}{Style.RESET_ALL}")
     if unrecommended_headers:
         print(f"{Fore.RED}[ - ] Unrecommended headers:{Style.RESET_ALL}")
         for header in unrecommended_headers:
             print(f"{Fore.RED}\t - {header}{Style.RESET_ALL}")
+    if dangerous_misconfig_headers:
+        print(f"{Fore.YELLOW} [ ! ] Critical headers misconfigured:{Style.RESET_ALL}")
+        for name, actual, recommended in dangerous_misconfig_headers:
+            print(f"{Fore.YELLOW}\t * {name}:\n\t\tFound: '{actual}'\n\t\tRecommended: '{recommended}'{Style.RESET_ALL}")
     if misconfigured_headers:
         print(f"{Fore.YELLOW}[ * ] Misconfigured headers:{Style.RESET_ALL}")
         for name, actual, recommended in misconfigured_headers:
@@ -84,8 +121,8 @@ if __name__ == "__main__":
         for header in missing_headers:
             print(f"{Fore.CYAN}\t + {header}{Style.RESET_ALL}")
     # Check if headers best practice is maintained
-    if len(unrecommended_headers) + len(misconfigured_headers) + len(missing_headers) == 0:
+    if len(unrecommended_headers) + len(misconfigured_headers) + len(missing_headers) + len(dangerous_headers) + len(dangerous_misconfig_headers) == 0:
         print(f"{Fore.GREEN}[ :) ] No issues found! Well done!{Style.RESET_ALL}")
     
-    print(f"{Fore.GREEN}Summary: {Fore.RED}{len(unrecommended_headers)} Unrecommended headers, {Fore.YELLOW} {len(misconfigured_headers)} Misconfigured headers, {Fore.CYAN} {len(missing_headers)} Missing headers.")
+    print(f"{Fore.GREEN}Summary: {Fore.BLACK}{len(dangerous_headers)} Missing critical headers, {Fore.RED}{len(unrecommended_headers)} Unrecommended headers, {Fore.YELLOW} {len(misconfigured_headers) + len(dangerous_misconfig_headers)} Misconfigured headers, {Fore.CYAN} {len(missing_headers)} Missing headers.")
     sys.exit(0)
