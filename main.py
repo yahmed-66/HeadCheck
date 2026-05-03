@@ -103,7 +103,7 @@ if __name__ == "__main__":
     if dangerous_headers:
         print(f"{Fore.BLACK} [ !! ] CRITICAL HEADERS MISSING: {Style.RESET_ALL}")
         for header in dangerous_headers:
-            print(f"{Fore.BLACK}\t - {header}{Style.RESET_ALL}")
+            print(f"{Fore.BLACK}\t !! {header}{Style.RESET_ALL}")
     if unrecommended_headers:
         print(f"{Fore.RED}[ - ] Unrecommended headers:{Style.RESET_ALL}")
         for header in unrecommended_headers:
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     if dangerous_misconfig_headers:
         print(f"{Fore.YELLOW} [ ! ] Critical headers misconfigured:{Style.RESET_ALL}")
         for name, actual, recommended in dangerous_misconfig_headers:
-            print(f"{Fore.YELLOW}\t * {name}:\n\t\tFound: '{actual}'\n\t\tRecommended: '{recommended}'{Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}\t ! {name}:\n\t\tFound: '{actual}'\n\t\tRecommended: '{recommended}'{Style.RESET_ALL}")
     if misconfigured_headers:
         print(f"{Fore.YELLOW}[ * ] Misconfigured headers:{Style.RESET_ALL}")
         for name, actual, recommended in misconfigured_headers:
