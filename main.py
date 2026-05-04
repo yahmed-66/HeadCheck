@@ -42,6 +42,10 @@ def make_request(url, allow_redirects=True):
         )
         return response
     except requests.exceptions.RequestException as e:
+        # Bypass SSL cert issues
+        if "SSL" in str(e) or "certificate" in str(e).lower():
+            print(f"{Fore.RED}[ ! ] SSL certificate is misconfigured.{Style.RESET_ALL}")
+            return requests.get(url, allow_redirects=allow_redirects, impersonate="chrome", verify=False)
         print(f"{Fore.RED}[ ! ] An error occurred while making the request:{Style.RESET_ALL}")
         print(f"{Fore.RED}[ ! ] Error: {e}{Style.RESET_ALL}")
         sys.exit(1)
