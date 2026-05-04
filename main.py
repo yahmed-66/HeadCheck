@@ -124,5 +124,5 @@ if __name__ == "__main__":
     if len(unrecommended_headers) + len(misconfigured_headers) + len(missing_headers) + len(dangerous_headers) + len(dangerous_misconfig_headers) == 0:
         print(f"{Fore.GREEN}[ :) ] No issues found! Well done!{Style.RESET_ALL}")
     
-    print(f"{Fore.GREEN}Summary: {Fore.BLACK}{len(dangerous_headers)} Missing critical headers, {Fore.RED}{len(unrecommended_headers)} Unrecommended headers, {Fore.YELLOW} {len(misconfigured_headers) + len(dangerous_misconfig_headers)} Misconfigured headers, {Fore.CYAN} {len(missing_headers)} Missing headers.")
+    print(f"{Fore.GREEN}Summary: {Fore.MAGENTA}{len(dangerous_headers)} Missing critical headers, {Fore.RED}{len(unrecommended_headers)} Unrecommended headers, {Fore.YELLOW} {len(misconfigured_headers) + len(dangerous_misconfig_headers)} Misconfigured headers, {Fore.CYAN} {len(missing_headers)} Missing headers.")
     sys.exit(0)
